@@ -1,169 +1,34 @@
 import greenfoot.*;
 
 public class GameWorld extends World {
-    private static final int SIZE = 4;
-    private static final int TILE_SIZE = 100;
-
-    private Tile[][] grid = new Tile[SIZE][SIZE];
-    private ScoreBoard scoreBoard;
 
     public GameWorld() {
-        super(SIZE * TILE_SIZE, SIZE * TILE_SIZE + 50, 1);
-
-        drawBackground();
-
-        scoreBoard = new ScoreBoard();
-        addObject(scoreBoard, getWidth() / 2, SIZE * TILE_SIZE + 25);
-
-        spawnRandomTile();
-        spawnRandomTile();
-        drawGrid();
-    }
-
-    private void drawBackground() {
-        GreenfootImage bg = new GreenfootImage(getWidth(), getHeight());
-        bg.setColor(new Color(250, 248, 239));
-        bg.fill();
-        setBackground(bg);
+        super(600, 600, 1);
+        drawScreen();
     }
 
     public void act() {
-        if (Greenfoot.isKeyDown("left")) {
-            moveLeft();
-            afterMove();
-        } else if (Greenfoot.isKeyDown("right")) {
-            moveRight();
-            afterMove();
-        } else if (Greenfoot.isKeyDown("up")) {
-            moveUp();
-            afterMove();
-        } else if (Greenfoot.isKeyDown("down")) {
-            moveDown();
-            afterMove();
+        if (Greenfoot.isKeyDown("left") ||
+            Greenfoot.isKeyDown("right") ||
+            Greenfoot.isKeyDown("up") ||
+            Greenfoot.isKeyDown("down")) {
+
+            Greenfoot.setWorld(new TileWorld());
         }
     }
 
-    private void afterMove() {
-        spawnRandomTile();
-        drawGrid();
-        Greenfoot.delay(10);
-    }
+    private void drawScreen() {
+        GreenfootImage img = new GreenfootImage(600, 600);
+        img.setColor(new Color(250, 248, 239));
+        img.fill();
 
-    private void drawGrid() {
-        getObjects(Tile.class).forEach(this::removeObject);
+        img.setColor(Color.BLACK);
+        img.setFont(new Font("Arial", true, false, 72));
+        img.drawString("2048", 200, 220);
 
-        for (int y = 0; y < SIZE; y++) {
-            for (int x = 0; x < SIZE; x++) {
-                if (grid[y][x] != null) {
-                    addObject(grid[y][x],
-                        x * TILE_SIZE + TILE_SIZE / 2,
-                        y * TILE_SIZE + TILE_SIZE / 2);
-                }
-            }
-        }
-    }
+        img.setFont(new Font("Arial", false, false, 28));
+        img.drawString("Press an arrow key to start", 140, 320);
 
-    private void moveLeft() {
-        for (int y = 0; y < SIZE; y++) {
-            Tile[] row = squeeze(grid[y]);
-            row = merge(row);
-            row = squeeze(row);
-            grid[y] = row;
-        }
-    }
-
-    private void moveRight() {
-        for (int y = 0; y < SIZE; y++) {
-            Tile[] row = reverse(grid[y]);
-            row = squeeze(row);
-            row = merge(row);
-            row = squeeze(row);
-            grid[y] = reverse(row);
-        }
-    }
-
-    private void moveUp() {
-        for (int x = 0; x < SIZE; x++) {
-            Tile[] col = squeeze(getColumn(x));
-            col = merge(col);
-            col = squeeze(col);
-            setColumn(x, col);
-        }
-    }
-
-    private void moveDown() {
-        for (int x = 0; x < SIZE; x++) {
-            Tile[] col = reverse(getColumn(x));
-            col = squeeze(col);
-            col = merge(col);
-            col = squeeze(col);
-            setColumn(x, reverse(col));
-        }
-    }
-
-    private Tile[] squeeze(Tile[] line) {
-        Tile[] result = new Tile[SIZE];
-        int index = 0;
-        for (Tile t : line)
-            if (t != null) result[index++] = t;
-        return result;
-    }
-
-    private Tile[] merge(Tile[] line) {
-        for (int i = 0; i < SIZE - 1; i++) {
-            if (line[i] != null && line[i + 1] != null &&
-                line[i].value == line[i + 1].value) {
-
-                int newValue = line[i].value * 2;
-                line[i].setValue(newValue);
-                scoreBoard.addScore(newValue);
-                line[i + 1] = null;
-            }
-        }
-        return line;
-    }
-
-    private Tile[] reverse(Tile[] line) {
-        Tile[] result = new Tile[SIZE];
-        for (int i = 0; i < SIZE; i++)
-            result[i] = line[SIZE - 1 - i];
-        return result;
-    }
-
-    private Tile[] getColumn(int x) {
-        Tile[] col = new Tile[SIZE];
-        for (int y = 0; y < SIZE; y++)
-            col[y] = grid[y][x];
-        return col;
-    }
-
-    private void setColumn(int x, Tile[] col) {
-        for (int y = 0; y < SIZE; y++)
-            grid[y][x] = col[y];
-    }
-
-    private void spawnRandomTile() {
-        int freeCount = 0;
-        for (int y = 0; y < SIZE; y++)
-            for (int x = 0; x < SIZE; x++)
-                if (grid[y][x] == null) freeCount++;
-
-        if (freeCount == 0) return;
-
-        int pick = Greenfoot.getRandomNumber(freeCount);
-        int index = 0;
-
-        for (int y = 0; y < SIZE; y++) {
-            for (int x = 0; x < SIZE; x++) {
-                if (grid[y][x] == null) {
-                    if (index == pick) {
-                        grid[y][x] =
-                            new Tile(Greenfoot.getRandomNumber(10) < 9 ? 2 : 4);
-                        return;
-                    }
-                    index++;
-                }
-            }
-        }
+        setBackground(img);
     }
 }

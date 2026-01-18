@@ -13,12 +13,12 @@ public class ScoreBoard extends Actor {
     }
 
     private void updateImage() {
-        GreenfootImage img = new GreenfootImage(300, 50);
+        GreenfootImage img = new GreenfootImage(300, 40);
         img.setColor(Color.WHITE);
         img.fill();
         img.setColor(Color.BLACK);
-        img.setFont(img.getFont().deriveFont(24f));
-        img.drawString("Score: " + score, 20, 35);
+        img.setFont(img.getFont().deriveFont(22f));
+        img.drawString("Score: " + score, 10, 28);
         setImage(img);
     }
 }

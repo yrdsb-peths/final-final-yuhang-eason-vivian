@@ -12,8 +12,8 @@ public class Tile extends Actor {
         updateImage();
     }
 
-    public void setValue(int newValue) {
-        value = newValue;
+    public void setValue(int v) {
+        value = v;
         updateImage();
     }
 
