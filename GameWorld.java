@@ -3,12 +3,28 @@ import greenfoot.*;
 public class GameWorld extends World {
     private static final int SIZE = 4;
     private static final int TILE_SIZE = 100;
+
     private Tile[][] grid = new Tile[SIZE][SIZE];
+    private ScoreBoard scoreBoard;
 
     public GameWorld() {
-        super(SIZE * TILE_SIZE, SIZE * TILE_SIZE, 1);
+        super(SIZE * TILE_SIZE, SIZE * TILE_SIZE + 50, 1);
+
+        drawBackground();
+
+        scoreBoard = new ScoreBoard();
+        addObject(scoreBoard, getWidth() / 2, SIZE * TILE_SIZE + 25);
+
         spawnRandomTile();
         spawnRandomTile();
+        drawGrid();
+    }
+
+    private void drawBackground() {
+        GreenfootImage bg = new GreenfootImage(getWidth(), getHeight());
+        bg.setColor(new Color(250, 248, 239));
+        bg.fill();
+        setBackground(bg);
     }
 
     public void act() {
@@ -35,18 +51,21 @@ public class GameWorld extends World {
 
     private void drawGrid() {
         getObjects(Tile.class).forEach(this::removeObject);
+
         for (int y = 0; y < SIZE; y++) {
             for (int x = 0; x < SIZE; x++) {
-                if (grid[y][x] != null)
-                    addObject(grid[y][x], x * TILE_SIZE + TILE_SIZE/2, y * TILE_SIZE + TILE_SIZE/2);
+                if (grid[y][x] != null) {
+                    addObject(grid[y][x],
+                        x * TILE_SIZE + TILE_SIZE / 2,
+                        y * TILE_SIZE + TILE_SIZE / 2);
+                }
             }
         }
     }
 
     private void moveLeft() {
         for (int y = 0; y < SIZE; y++) {
-            Tile[] row = grid[y];
-            row = squeeze(row);
+            Tile[] row = squeeze(grid[y]);
             row = merge(row);
             row = squeeze(row);
             grid[y] = row;
@@ -65,8 +84,7 @@ public class GameWorld extends World {
 
     private void moveUp() {
         for (int x = 0; x < SIZE; x++) {
-            Tile[] col = getColumn(x);
-            col = squeeze(col);
+            Tile[] col = squeeze(getColumn(x));
             col = merge(col);
             col = squeeze(col);
             setColumn(x, col);
@@ -95,7 +113,10 @@ public class GameWorld extends World {
         for (int i = 0; i < SIZE - 1; i++) {
             if (line[i] != null && line[i + 1] != null &&
                 line[i].value == line[i + 1].value) {
-                line[i].value *= 2;
+
+                int newValue = line[i].value * 2;
+                line[i].setValue(newValue);
+                scoreBoard.addScore(newValue);
                 line[i + 1] = null;
             }
         }
@@ -131,11 +152,13 @@ public class GameWorld extends World {
 
         int pick = Greenfoot.getRandomNumber(freeCount);
         int index = 0;
+
         for (int y = 0; y < SIZE; y++) {
             for (int x = 0; x < SIZE; x++) {
                 if (grid[y][x] == null) {
                     if (index == pick) {
-                        grid[y][x] = new Tile(Greenfoot.getRandomNumber(10) < 9 ? 2 : 4);
+                        grid[y][x] =
+                            new Tile(Greenfoot.getRandomNumber(10) < 9 ? 2 : 4);
                         return;
                     }
                     index++;
